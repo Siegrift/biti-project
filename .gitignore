@@ -1,0 +1,8 @@
+/latex/*.aux
+/latex/*.bbl
+/latex/*.blg
+/latex/*.lof
+/latex/*.lot
+/latex/*.out
+/latex/*.toc
+/latex/*.log
