@@ -2,7 +2,7 @@
 
 > BITI = Bezpečnosť IT infraštruktúry
 
-Security project security of IT infrastructure.
+School project for security of IT infrastructure.
 
 ## Goals
 
