@@ -6,3 +6,6 @@
 /latex/*.out
 /latex/*.toc
 /latex/*.log
+/latex/*.fls
+/latex/*.fdb_latexmk
+/latex/*.gz
