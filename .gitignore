@@ -16,3 +16,4 @@ snapshot-esbuild/public/index.css
 snapshot-snowpack/build/
 snapshot-vite/dist/
 snapshot-wmr/dist/
+snapshot-wmr/.cache/
