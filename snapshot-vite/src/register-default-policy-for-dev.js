@@ -1,14 +1,8 @@
 /** 
  * Demonstrates the need for default policy in certain scenarios.
  * 
- * The policy is needed for snowpack hot reload error widget to work properly.
- * Upon saving file with code changes, snowpack triggers a page refresh
- * (hard reload) and if there is an error it will prompt a nice widget with
- * error description and stack trace. Unfortunately, it uses Element.innerHTML
- * assignment under the hood which is banned by Trusted Types. 
- * 
- * See:
- * https://github.com/snowpackjs/snowpack/blob/fc6c1417a09ac85e02730033660391d299a5fd97/snowpack/assets/hmr-error-overlay.js#L891
+ * The policy is needed for vite to update css styles. I am not sure why they need it though
+ * as Snowpack seems to be able to reload styles without TT violation.
  */
 
 if (!window.trustedTypes) {
