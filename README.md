@@ -19,6 +19,12 @@ ES modules and skip the bundle concatenation.
 The snapshot projects were reused from https://github.com/Elliotclyde/build-tool-test
 for which I am grateful.
 
+The ethereum project was intended to verify whether TT work with browser extension. The
+project is intended to be used in combination with metamask.
+
+The nextjs example was inspired by my previous work at Google internship and was basically
+copy-pasted from https://github.com/Siegrift/nextjs-tt-integration/tree/master/example-app.
+
 ## Instructions
 
 Every snapshot folder is a version of the same project. You can install deps with

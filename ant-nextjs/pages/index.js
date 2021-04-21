@@ -1,104 +1,116 @@
-import { Form, Select, InputNumber, Switch, Slider, Button } from 'antd'
-
-// Custom DatePicker that uses Day.js instead of Moment.js
-import DatePicker from '../components/DatePicker'
-
-import { SmileFilled } from '@ant-design/icons'
-
-import Link from 'next/link'
-
-const FormItem = Form.Item
-const Option = Select.Option
+import Router from 'next/router'
+import dynamic from 'next/dynamic'
 
 const content = {
   marginTop: '100px',
 }
 
-export default function Home() {
-  return (
-    <div style={content}>
-      <div className="text-center mb-5">
-        <Link href="#">
-          <a className="logo mr-0">
-            <SmileFilled size={48} strokeWidth={1} />
-          </a>
-        </Link>
+const DynamicScript = dynamic(() => import('./script'), { ssr: false })
 
-        <p className="mb-0 mt-3 text-disabled">Welcome to the world !</p>
+// This example demonstrates how using default policy might hurt the safety of the app
+// and make it hard to notice potential attacks. 
+//
+// We need to use "very blessing" policy, because there are many violations in different
+// parts of nextjs (client, server, hot reloading module, webpack...).
+//
+// However, when the default policy is active we can't block many attack vectors
+// introduced by the code.
+//
+// Another big problem is server side rendering, which are out of scope of TT but there
+// are experiments of configuring TT with domino (for apps that use domino - e.g. angular)
+// https://github.com/fgnass/domino/issues/171
+// Unfortunataly, emularing DOM has it's own problems and React is not using DOM emulation.
+// Instead, they use string rendered to create HTML string markup from React components.
+export default class Home extends React.Component {
+  state = {
+    untrustedHrefText: '',
+    untrustedHref: '',
+    html: '',
+    nodes: [],
+    untrustedHtml: '',
+    untrustedNodes: [],
+    iframe: false,
+  }
+
+  render() {
+    return (
+      <div style={content}>
+        <div>
+          <button onClick={() => Router.push('/about')}>About route</button>
+          <button onClick={() => Router.push('/nonExistent')}>
+            Non-existent route
+          </button>
+        </div>
+
+        {/* These ones are interesting. If you navigate to these pages via router then they will */}
+        {/* be rendered only on the client side and react will prevent script execution (= no xss) */}
+        {/* But if you refresh the page, it will be server side rendered and TT won't prevent */}
+        {/* the reflected xss - which is not really in scope of TT */}
+        <div>
+          <button onClick={() => Router.push('/script')}>Render script</button>
+          <button onClick={() => Router.push('/dangerous')}>Script URL</button>
+        </div>
+
+        {/* Try: javascript:alert(0) */}
+        {/* It will get executed, but there will be a red warning that React will not support */}
+        {/* javascript URLs in future releases. Trusted Types are also not guarding against this */}
+        {/* attack vector because it was unreasonable complex to guard all the URLs of an app */}
+        {/* and most of the application use (safe) URLs and only a very small portion (mainly legacy) */}
+        {/* apps use javascript URLs now.*/}
+        {/* In case the app uses TT and javascript URLs, the value will be passed through default. */}
+        {/* policy first and only afterwards executed. */}
+        <p>
+          {this.state.untrustedHref && (
+            <a href={this.state.untrustedHref}>Link with NON trusted href</a>
+          )}
+          <input
+            type="text"
+            value={this.state.untrustedHrefText}
+            onChange={(e) =>
+              this.setState({ untrustedHrefText: e.target.value })
+            }
+          />
+          <button
+            onClick={() =>
+              this.setState((s) => ({ untrustedHref: s.untrustedHrefText }))
+            }
+          >
+            Set untrusted href
+          </button>
+        </p>
+
+        {/* Try: <img src=x onerror=alert(0) /> */}
+        <p>
+          Add node with NON trusted dangerouslySetInnerHTML
+          <input
+            type="text"
+            value={this.state.untrustedHtml}
+            onChange={(e) => this.setState({ untrustedHtml: e.target.value })}
+          />
+          <button
+            onClick={() =>
+              this.setState((s) => ({
+                untrustedNodes: [...s.untrustedNodes, s.untrustedHtml],
+              }))
+            }
+          >
+            Add NON trusted node
+          </button>
+        </p>
+
+        {/* React can't execute dynamic scripts: react-dom/src/client/ReactDOMComponent.js */}
+        <DynamicScript />
+
+        {/* Will try to add iframe with srcdoc. */}
+        <p>
+          <button onClick={() => this.setState({ iframe: true })}>
+            Add unsecure iframe
+          </button>
+          {this.state.iframe && (
+            <iframe srcDoc={'<script>alert(0)</script>'}></iframe>
+          )}
+        </p>
       </div>
-      <div>
-        <Form layout="horizontal">
-          <FormItem
-            label="Input Number"
-            labelCol={{ span: 8 }}
-            wrapperCol={{ span: 8 }}
-          >
-            <InputNumber
-              size="large"
-              min={1}
-              max={10}
-              style={{ width: 100 }}
-              defaultValue={3}
-              name="inputNumber"
-            />
-          </FormItem>
-
-          <FormItem
-            label="Switch"
-            labelCol={{ span: 8 }}
-            wrapperCol={{ span: 8 }}
-          >
-            <Switch defaultChecked name="switch" />
-          </FormItem>
-
-          <FormItem
-            label="Slider"
-            labelCol={{ span: 8 }}
-            wrapperCol={{ span: 8 }}
-          >
-            <Slider defaultValue={70} />
-          </FormItem>
-
-          <FormItem
-            label="Select"
-            labelCol={{ span: 8 }}
-            wrapperCol={{ span: 8 }}
-          >
-            <Select
-              size="large"
-              defaultValue="lucy"
-              style={{ width: 192 }}
-              name="select"
-            >
-              <Option value="jack">jack</Option>
-              <Option value="lucy">lucy</Option>
-              <Option value="disabled" disabled>
-                disabled
-              </Option>
-              <Option value="yiminghe">yiminghe</Option>
-            </Select>
-          </FormItem>
-
-          <FormItem
-            label="DatePicker"
-            labelCol={{ span: 8 }}
-            wrapperCol={{ span: 8 }}
-          >
-            <DatePicker name="startDate" />
-          </FormItem>
-          <FormItem
-            style={{ marginTop: 48 }}
-            wrapperCol={{ span: 8, offset: 8 }}
-          >
-            <Button size="large" type="primary" htmlType="submit">
-              OK
-            </Button>
-            <Button size="large" style={{ marginLeft: 8 }}>
-              Cancel
-            </Button>
-          </FormItem>
-        </Form>
-      </div>
-    </div>
-  )
+    )
+  }
 }
