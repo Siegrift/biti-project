@@ -30,7 +30,7 @@ function App() {
   return (
     <div className="App App-container">
       <h1>Ethereum demo</h1>
-      <p style={{color: 'red'}}>{error && "Unexpected error"}</p>
+      <p style={{color: 'red'}}>{error && "Error getting data. Is metamask extension installed?"}</p>
       <p>{!data && 'loading...'}</p>
       {!!data && (
         <>
