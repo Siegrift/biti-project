@@ -11,6 +11,8 @@
 /latex/*.gz
 
 node_modules/
+snapshot-esbuild/public/index.js
+snapshot-esbuild/public/index.css
 snapshot-snowpack/build/
 snapshot-vite/dist/
 snapshot-wmr/dist/
