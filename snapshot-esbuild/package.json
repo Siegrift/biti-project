@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "node build.js",
+    "build:watch": "node build-watch.js",
     "dev": "npm run build && npm run serve",
     "serve": "xdg-open public/index.html"
   },
