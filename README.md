@@ -14,7 +14,14 @@ react. I'd like to revisit this topic and target (and actually try out) modern b
 [esbuild](https://esbuild.github.io/) or [snowpack](https://www.snowpack.dev/) which use the native
 ES modules and skip the bundle concatenation.
 
-### Inspired by
+## Inspired by
 
 The snapshot projects were reused from https://github.com/Elliotclyde/build-tool-test
 for which I am grateful.
+
+## Instructions
+
+Every snapshot folder is a version of the same project. You can install deps with
+`npm install` and check `package.json` for available commands.
+
+Make sure you have at least node `v12` - the vite example requires it.

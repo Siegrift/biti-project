@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <meta http-equiv='Content-Security-Policy' content="require-trusted-types-for 'script'; trusted-types bless-the-sun default">
     <meta charset="utf-8" />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1, shrink-to-fit=no"
     />
- <title>Snap Shot</title>
+    <title>Snap Shot</title>
+    <!-- TODO: FOR PRODUCTION: This should be removed when building prod -->
+    <script type="module" src="./register-default-policy-for-dev.js"></script>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
