@@ -13,3 +13,8 @@ I already investiageted some bundlers (mainly webpack) in the past, while workin
 react. I'd like to revisit this topic and target (and actually try out) modern bundlers such as
 [esbuild](https://esbuild.github.io/) or [snowpack](https://www.snowpack.dev/) which use the native
 ES modules and skip the bundle concatenation.
+
+### Inspired by
+
+The snapshot projects were reused from https://github.com/Elliotclyde/build-tool-test
+for which I am grateful.

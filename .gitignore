@@ -9,3 +9,8 @@
 /latex/*.fls
 /latex/*.fdb_latexmk
 /latex/*.gz
+
+node_modules/
+snapshot-snowpack/build/
+snapshot-vite/dist/
+snapshot-wmr/dist/
