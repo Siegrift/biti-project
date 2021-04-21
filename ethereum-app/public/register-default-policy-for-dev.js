@@ -55,6 +55,7 @@ window.trustedTypes.createPolicy('default', {
   },
   createScriptURL: (value) => {
     console.warn('[DEV]: Blessing script value', {value})
+    return value
   },
 })
 
