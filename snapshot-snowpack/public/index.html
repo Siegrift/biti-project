@@ -2,11 +2,13 @@
 <html lang="en">
 
 <head>
-    <meta http-equiv='Content-Security-Policy' content="require-trusted-types-for 'script'; trusted-types bless-the-sun">
+    <meta http-equiv='Content-Security-Policy' content="require-trusted-types-for 'script'; trusted-types bless-the-sun default">
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="Web site created using create-snowpack-app" />
     <title>Snowpack App</title>
+    <!-- TODO: FOR PRODUCTION: This should be removed when building prod -->
+    <script type="module" src="/dist/register-default-policy-for-dev.js"></script>
 </head>
 
 <body>
