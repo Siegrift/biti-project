@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL XSS</title>
+  </head>
+
+  <body>
+    <!-- The example is just encoded "<img src=x onerror=alert(1) />" -->
+    <p>Try searching something: <i>(for example "&lt;img src=x onerror=alert(1) /&gt;")</i></p>
+    <input id="query" type="text" />
+    <button id="submit">Search</button>
+
+    <p>You have searched for</p>
+    <p id="attack-target"></p>
+  </body>
+
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(location.search)
+      document.getElementById('attack-target').innerHTML = urlParams.get('query')
+    });
+
+    document
+      .getElementById('submit')
+      .addEventListener('click', () => {
+        const query = document.getElementById('query').value
+        location.replace(`${location.pathname}?query=${encodeURIComponent(query)}`);
+      })
+  </script>
+
+</html>
