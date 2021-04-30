@@ -1,0 +1,78 @@
+\chapter{Bundlers and Trusted Types}
+
+\label{chapter:bundlers} % chapter id for ref command
+
+% TODO: this will need to be rewritten for master thesis
+We have briefly explained the problem with bundlers when TT are enforced in development mode. The
+purpose of the project was to take a look at example application using many modern bundlers and see
+how they integrate with Trusted Types. This work was based off my previous experience when doing the
+integration for Webpack \cite{webpack_tt_integration}.
+
+When bundlers are not TT compatible it often means \textbf{hard blocker} for the application
+developer to start using TT. This is because the application in dev environment might not even load
+\emph{(this is the case when using webpack)} or some features such as hot reloading and error
+widgets might not work.
+
+The integration for webpack is already in progress and will hopefully get merged soon. I've instead looked at the following:
+
+\begin{itemize}
+  \item  ESBuild \cite{esbuild_web} - ESBuild is an extremely fast JavaScript bundler by factor
+        10-100x compared to popular bundler alternatives. The main reason for such performance is
+        because it's written in Go and heavily uses parallelism \cite{esbuild_fast}.
+  \item  Snowpack \cite{snowpack_web} - Snowpack is an alternative to heavier, more complex bundlers
+        like Webpack or Parcel in your development workflow. Snowpack leverages JavaScript's native
+        module system called \emph{(ESM - ES modules)} which makes it scale much better as the
+        project grows on size.
+  \item  Vite \cite{vite_web} - Vite is very similar to Snowpack and uses the same idea - \emph{use
+          the native ES modules}. The main difference is that Vite is opinionated about
+        \emph{production builds} and uses \emph{Rollup} under the hood. This provides simpler
+        developer experience and unlocks features which are not natively supported by Snowpack.
+  \item  WMR \cite{wmr_web} - WMR is a tiny development tool composed in a single 2mb file with no
+        dependencies. It provides a nice integration with Preact, but can be used independently as
+        well.
+\end{itemize}
+
+As a bonus I also tried creating application using the current state of the art React project
+starters \emph{(which use Webpack as bundler internally)}:
+
+\begin{itemize}
+  \item  NextJS \cite{nextjs_web} - NextJS is a React framework, which provides many features such
+        as extended server side rendering, hosting, deployments, etc...
+  \item  CRA (Create React App) \cite{cra_web} - CRA is the official recommended way by React to
+        bootstrap new application which want to use React. It uses very well configured Webpack
+        under the hood and keeps in sync with latest React versions.
+\end{itemize}
+
+% Add vertical space, because the next paragraph will be an intro for the sections followed.
+\bigskip
+
+In order to demonstrate the bundlers we need an example application. I've come across a great
+article which compares the bundlers I want to integrate TT with. The article referenced also a
+github project with an example application that was written using each of the mentioned bundlers. We
+are not going to compare the bundlers among themselves, but rather focus on TT integration. However,
+you can check the blog post at
+\url{https://css-tricks.com/comparing-the-new-generation-of-build-tools/}.
+
+\section{ESBuild}
+
+TODO:
+
+\section{Snowpack}
+
+TODO:
+
+\section{Vite}
+
+TODO:
+
+\section{WMR}
+
+TODO:
+
+\section{NextJS}
+
+TODO:
+
+\section{CRA}
+
+TODO:
