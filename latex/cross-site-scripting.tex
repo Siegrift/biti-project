@@ -140,13 +140,54 @@ execute this HTML code in the browser and you try searching for something, the r
 interpolated in the page. This allows the attacker to \emph{prepare an evil URL} which they can then
 send to benign users to exploit.
 
+For more examples, I recommend playing the \emph{"XSS games"} \cite{xss_game_1} \cite{xss_game_2}
+\cite{xss_game_3} \cite{xss_game_4}.
+
+Finally, there are many cheatsheets with possible attack payloads and polyglots \emph{Code that
+  works for various environments, such as HTML, JS, CSS}. For example: \cite{xss_attack_cheatsheet}.
+
 \section{Consequences of XSS}
 
 So far, we have talked about many types of XSS, saw a basic example and are aware that there are
 many more. What we haven't covered are the consequences, which can be caused by these attacks.
 
-TODO: write me
+Citing cypress data defense article about XSS \cite{cypress_xss_consequences}:
+
+\begin{quotation}
+  The impact of cross-site scripting vulnerabilities can vary from one web application to another.
+  It ranges from session hijacking to credential theft and other security vulnerabilities. By
+  exploiting a cross-site scripting vulnerability, an attacker can impersonate a legitimate user and
+  take over their account.
+
+  If the victim user has administrative privileges, it might lead to severe damage such as
+  modifications in code or databases to further weaken the security of the web application,
+  depending on the rights of the account and the web application.
+\end{quotation}
+
+Apart from these basic consequences, there are dozens of others. Citing \cite{xss_owasp_intro}:
+
+\begin{quotation}
+  Other damaging attacks include the disclosure of end user files, installation of Trojan horse
+  programs, redirect the user to some other page or site, or modify presentation of content. An XSS
+  vulnerability allowing an attacker to modify a press release or news item could affect a company’s
+  stock price or lessen consumer confidence. An XSS vulnerability on a pharmaceutical site could
+  allow an attacker to modify dosage information resulting in an overdose.
+\end{quotation}
+
+Also, sites might have more security vulnerabilities and even a benign XSS vulnerability might be
+used with combination with a different attack vector \emph{e.g. CSRF} which has often more severe
+consequences.
 
 \section{Protection}
 
-TODO: write me
+There are no definitive measures to protect against XSS, however there are guidelines. XSS is caused
+by interpolating untrusted data into otherwise trusted environments. It is important to educate
+developers about the possible attack vectors and vulnerabilities in the underlying platforms
+\emph{e.g. DOM and possible attack vectors with HTML/CSS.}
+
+Applications, which need to interpolate uncontrolled user data into their applications need to make
+sure the input is safe. In pratice, this means \textbf{encoding} or \textbf{sanitizing} the inputs.
+It is also important to follow the new modern APIs which aim to prevent XSS - these include various
+security headers \emph{Use Security Headers in \cite{cypress_xss_consequences}} or modern APIs such
+as Safe-Types \cite{safe_types} and Trusted Types \cite{trusted_types_into}. The latter will be
+described in the rest of the paper.

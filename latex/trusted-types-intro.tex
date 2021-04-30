@@ -1,50 +1,143 @@
-%  TODO: write about TT
 \chapter{Introduction to Trusted Types}
 
-\label{chapter:intro-tt} % id kapitoly pre prikaz ref
+\label{chapter:intro-tt} % chapter id for ref command
 
-In this chapter we are going to introduce the concept of Trusted Types (abbreviated as TT).
-V tejto kapitole si povieme niečo o jadre práce a o jej členení. V zdrojovom kóde v súbore
-\verb'kapitola.tex' nájdenie ukážky použitých príkazov LaTeXu potrebných na písanie nadpisov a
-podnadpisov a číslovaných a nečíslovaných zoznamov. Zvyšok textu tejto kapitoly je prebratý zo
-smernice o záverečných prácach \cite[článok 5]{smernica}.
+In this chapter we are going to introduce the concept of Trusted Types (abbreviated as TT). The
+threat model under which TT operate is DOM XSS \emph{(subset of client side XSS)}. This
+vulnerability happens when untrusted, user controlled input reaches a \emph{sink} which is function
+like \emph{eval()} or \emph{innerHTML} property of an HTML element.
 
-Jadro je hlavná časť školského diela a člení sa na kapitoly, podkapitoly, odseky a pod., ktoré sa
-vzostupne číslujú.
+The idea is to take all of the sinks and make them secure by default. For example, in DOM you can
+assign any string value to \emph{innerHTML} property of an element and the browser will parse the
+string using HTML parser and render the parsed markup. Instead, we make this property accept only
+\emph{\textbf{special branded objects}} and throw an error on any other value \emph{e.g. string}.
 
-\section{Členenie}
-Členenie jadra školského diela je určené typom  školského diela. Vo vedeckých a odborných prácach má
-jadro spravidla tieto hlavné časti:
+This is a breaking change behaviour in DOM spec and is unfortunately not acceptable to change the
+DOM spec in this way. Instead, users who want to use TT have to explicitely opt-in to enforce this
+API. As of now, TT are supported in chromium based browser, but it is likely the support will
+increase \cite{tt_compatibility}.
+
+Developers are asked to avoid the sinks if possible to reduce the attack surface, however, sometimes
+there is no way to avoid the sink. For such cases there should be a way for developers to create
+these \emph{special branded objects} and make them explicitely \textbf{trusted} by the DOM APIs and
+sinks - hence the name \emph{Trusted Types}. Of course, if creating TT would be as easy as calling
+wrapping the value in a function call, developers would quickly misuse this behaviour and just wrap
+the unsafe values in that function call instead of making sure the value can be trusted.
+
+Refer to the recommended explainer article for more info \cite{trusted_types_into} or the formal
+spec \cite{tt_spec}.
+
+\section{Enforcing Trusted Types}
+
+As mentioned, TT is backward incompatible change and must be enforced explicitely by the developers.
+You can enable TT by adding the following response header to the documents which should operate
+under TT enforced.
+
+\bigskip
+% https://tex.stackexchange.com/questions/75324/lstinputlisting-for-a-normal-text-file
+\begin{lstlisting}[language={}, caption={Restricting policy names}]
+  Content-Security-Policy: require-trusted-types-for 'script';
+\end{lstlisting}
+
+\section{Creating Trusted Types}
+
+Most of the times, you can avoid using the sinks alltogether and use safe DOM APIs instead
+\emph{e.g. create DOM node dynamically instead of innerHTML assignment}. However there are cases
+when using sinks can't be avoided, or the values are already sanitized/encoded. You can create
+trusted type which will be accepted by the DOM sink.
+
+If your browser supports TT, you will have access to \emph{trustedTypes} global object on
+\emph{window} instance. You can use \emph{trustedTypes.createPolicy} function to create a policy,
+which acts like a "factory" for creating the trusted values. For example, citing
+\cite{trusted_types_into}:
+
+\bigskip
+\begin{lstlisting}[language=ES6, caption={Creating Trusted Types policy}]
+  if (window.trustedTypes && trustedTypes.createPolicy) { // Feature testing
+  const escapeHTMLPolicy = trustedTypes.createPolicy('myEscapePolicy', {
+    createHTML: string => string.replace(/\</g, '&lt;')
+  });
+}
+\end{lstlisting}
+
+and then you would use the policy simply by \emph{(again citing \cite{trusted_types_into})}:
+
+\bigskip
+\begin{lstlisting}[language=ES6, caption={Using the policy to create Trusted value}]
+  const escaped = escapeHTMLPolicy.createHTML('<img src=x onerror=alert(1)>');
+  console.log(escaped instanceof TrustedHTML);  // true
+  el.innerHTML = escaped;  // '&lt;img src=x onerror=alert(1)>'
+\end{lstlisting}
+
+However, as you noticed the policies are named. This is because you can restrict which policies
+might be created by your application. All you need to do is provide additional response header with
+a whitelist of allowed policy names.
+
+\bigskip
+% https://tex.stackexchange.com/questions/75324/lstinputlisting-for-a-normal-text-file
+\begin{lstlisting}[language={}, caption={Restricting policy names}]
+  Content-Security-Policy: require-trusted-types-for 'script'; trusted-types myEscapePolicy
+\end{lstlisting}
+
+\section{Report only mode}
+
+Before switching to enforcing mode, which will cause an error when untrusted value is assigned to a
+sink, you can switch to report only mode, which will preserve the original DOM API behaviour
+\emph{(no error will be thrown and standard sink behaviour will be used)}. However, there will be a
+warning in the console and CSP violation will be triggered. \cite{tt_intro_csp_violation}.
+
+You will also have to use slightly different CSP response header \cite{trusted_types_into}:
+
+\bigskip
+% https://tex.stackexchange.com/questions/75324/lstinputlisting-for-a-normal-text-file
+\begin{lstlisting}[language={}, caption={Report only CSP}]
+  Content-Security-Policy-Report-Only: require-trusted-types-for 'script'; report-uri //my-csp-endpoint.example
+\end{lstlisting}
+
+\section{Default policy}
+
+Creating your own policies and making sure \emph{trusted} values reach the sinks is not always
+possible. Application code is largely composed of many dependencies and third party code, which the
+developer can't easily modify. For such cases, there is special \emph{\textbf{default policy}} which
+will be called when untrusted value reaches is sink. It is the last place where the developer
+\emph{(specifically, the handler function the developer implemented)} might want \emph{bless} the
+value such that it will be accepted by the DOM API. \cite{trusted_types_into}
+
+\bigskip
+\begin{lstlisting}[language=ES6, caption={Creating default policy}]
+  if (window.trustedTypes && trustedTypes.createPolicy) { // Feature testing
+    trustedTypes.createPolicy('default', {
+      createHTML: (string, sink) => DOMPurify.sanitize(string, {RETURN_TRUSTED_TYPE: true})
+    });
+  }
+\end{lstlisting}
+
+Note, that \emph{default policy} is still a named policy and must be listed in the allowlist
+specified by \emph{trusted-types} response header \emph{(of course, this only applies if the
+  application uses this header)}.
+
+\section{Trusted Types integration}
+
+TT is being developed and used internally at Google, where they integrate it into their core
+products. However, many open source projects see the benefit of TT and started doing necessary steps
+needed for TT integration. The amount of work needed to integrate TT to application varies a lot.
+There are many factors which might contribute to this complexity:
+
 \begin{itemize}
-  \item  súčasný stav riešenej problematiky doma a v zahraničí,
-  \item  cieľ práce,
-  \item  metodika práce a metódy skúmania,
-  \item  výsledky práce,
-  \item  diskusia.
+  \item  Bundlers - This is more a developer nuisance than production issue. Main purpose for
+        bundlers is to transpile the code using latest \emph{(and not widely supported)} features to
+        standard version of JavaScript that all browsers understand. Nowdays, bundlers also take
+        care of serving the app in the development phase and providing features such as code
+        reloading \emph{which refresh the web page once developer code is saved} or showing a popup
+        with error message and stack trace. These development features often cause violations when
+        TT are enforced.
+  \item DOM framework - Modern web apps usually use some kind of framework \emph{(examples include:
+          React, Angular, Polymer, Vue, Svelte...)}. These frameworks often provide fine security
+        measures, but some frameworks may be more \emph{"TT friendly"} then others. For example,
+        making React or Polymer TT compliant is much easier than integration with Angular
+        \cite{react_tt_integration} \cite{polymer_tt_integration} \cite{angular_tt_integration}.
+  \item Other third party dependencies - Many third party dependencies might use sinks under the
+        hood and fixing such violations might be hard.
+  \item Application code - These are the violations in the source code of the developer, these are
+        usually the easiest to fix. You either avoid using the sink or wrap the value in a policy.
 \end{itemize}
-
-\subsection{Súčasný stav}
-V časti súčasný stav riešenej problematiky doma a v zahraničí autor uvádza dostupné informácie a
-poznatky týkajúce sa danej témy. Zdrojom pre spracovanie sú aktuálne publikované práce domácich a
-zahraničných autorov.  Podiel tejto časti práce má tvoriť približne 30 \% práce.
-
-\subsection{Cieľ práce}
-Časť cieľ práce  školského diela jasne, výstižne a presne charakterizuje predmet riešenia. Súčasťou
-sú aj rozpracované čiastkové ciele, ktoré podmieňujú dosiahnutie cieľa hlavného.
-
-\subsection{Metodika práce a metódy skúmania}
-Časť metodika práce a metódy skúmania spravidla obsahuje:
-\begin{enumerate}
-  \item  charakteristiku objektu skúmania,
-  \item  pracovné postupy,
-  \item  spôsob získavania údajov a ich zdroje,
-  \item  použité metódy vyhodnotenia a interpretácie výsledkov,
-  \item  štatistické metódy.
-\end{enumerate}
-
-\subsection{Výsledky práce a diskusia}
-Časti výsledky práce a diskusia sú najvýznamnejšími  časťami  školského diela. Výsledky (vlastné
-postoje alebo vlastné riešenia), ku ktorým autor dospel, sa musia logicky usporiadať a pri opisovaní
-sa musia dostatočne zhodnotiť. Zároveň sa komentujú všetky skutočnosti a poznatky v konfrontácii s
-výsledkami iných autorov. Výsledky práce a diskusia môžu tvoriť aj jednu samostatnú časť  a spoločne
-tvoria spravidla 30 až 40 \% školského diela.

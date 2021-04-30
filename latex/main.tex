@@ -31,6 +31,34 @@
   tabsize=3
 }
 
+% https://github.com/ghammock/LaTeX_Listings_JavaScript_ES6
+\lstdefinelanguage{JavaScript}{
+  morekeywords=[1]{break, continue, delete, else, for, function, if, in,
+    new, return, this, typeof, var, void, while, with},
+  % Literals, primitive types, and reference types.
+  morekeywords=[2]{false, null, true, boolean, number, undefined,
+    Array, Boolean, Date, Math, Number, String, Object},
+  % Built-ins.
+  morekeywords=[3]{eval, parseInt, parseFloat, escape, unescape},
+  sensitive,
+  morecomment=[s]{/*}{*/},
+  morecomment=[l]//,
+  morecomment=[s]{/**}{*/}, % JavaDoc style comments
+  morestring=[b]',
+  morestring=[b]"
+}[keywords, comments, strings]
+
+% https://github.com/ghammock/LaTeX_Listings_JavaScript_ES6
+\lstdefinelanguage[ECMAScript2015]{JavaScript}[]{JavaScript}{
+  morekeywords=[1]{await, async, case, catch, class, const, default, do,
+    enum, export, extends, finally, from, implements, import, instanceof,
+    let, static, super, switch, throw, try},
+  morestring=[b]` % Interpolation strings.
+}
+
+% % https://github.com/ghammock/LaTeX_Listings_JavaScript_ES6
+\lstalias[]{ES6}[ECMAScript2015]{JavaScript}
+
 % -------------------
 % --- Definicia zakladnych pojmov
 % --- Vyplnte podla vasho zadania
