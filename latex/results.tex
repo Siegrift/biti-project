@@ -1,0 +1,38 @@
+\chapter{Results}
+
+\label{chapter:results} % chapter id for ref command
+
+% TODO: this will need to be rewritten for master thesis
+I've compared multiple popular bundlers and project starters. Similar types of TT violations
+repeated among the bundlers.
+
+\begin{itemize}
+  \item  Error overlay widget - Snowpack, CRA and NextJS use an error widget to show compile and
+        application error and stacktrace to improve developer experience. Under the hood this uses
+        \emph{innerHMTL} property. Developers need to use default policy with \emph{createHTML}
+        function.
+  \item  Script violations - Needed for next JS hot reloading which uses webpack under the hood,
+        which uses \emph{eval} to evaluate the updated chunk of code. It was also needed for
+        Metamask widget \emph{(not sure why though)}. Developers need to use default policy with
+        \emph{createScript} function.
+  \item  Script URL violations - Again, needed for webpack hot reload. The chunks to be reloaded are
+        downloaded using and dynamically created script and by assigning to \emph{script.src}
+        property. Developers need to use default policy with \emph{createScriptURL} function.
+\end{itemize}
+
+Also it can be seen that the bundlers which use ES modules under the hood integrate better with TT.
+Snowpack doesn't need any policy for code reload and Vite only needs a policy to reload CSS.
+
+\section{Further work and TT improvements}
+
+I feel the biggest problem with TT is the adoption difficulty. Developers are facing difficult
+issues in third party code \emph{(which is often minified)} and default policy doesn't provide
+enough context to reliably allow only \emph{Trusted values}
+\cite{tt_source_file_violation_issue_comment}.
+
+Another aspect of work is to implement TT integrations inside the bundlers and project starters. The
+future of TT seems bright as React, Angular, VS Code and many other project start to use and enforce
+TT in their applications. Maybe in some time TT will be default standard in web development.
+
+You can check out all the sources and run the projects locally in
+\url{https://github.com/Siegrift/biti-project}.

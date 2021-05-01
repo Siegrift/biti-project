@@ -21,7 +21,6 @@ const isCssValue = (css) => {
   return css.includes('@media')
 }
 
-// Setup default policy which allows assigning the HMR widget.
 window.trustedTypes.createPolicy('default', {
   createHTML: (value) => {
     if (isCssValue(value)) {
