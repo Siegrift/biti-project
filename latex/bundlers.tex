@@ -11,18 +11,18 @@ integration for Webpack \cite{webpack_tt_integration}.
 When bundlers are not TT compatible it often means \textbf{hard blocker} for the application
 developer to start using TT. This is because the application in dev environment might not even load
 \emph{(this is the case when using webpack)} or some features such as hot reloading and error
-widgets might not work.
+widgets might not work properly.
 
-The integration for webpack is already in progress and will hopefully get merged soon. I've instead looked at the following:
+The integration for webpack is already in progress and will hopefully get merged soon
+\cite{webpack_tt_integration_soon_to_merge}. I've instead looked at the following:
 
 \begin{itemize}
   \item  ESBuild \cite{esbuild_web} - ESBuild is an extremely fast JavaScript bundler by factor
         10-100x compared to popular bundler alternatives. The main reason for such performance is
         because it's written in Go and heavily uses parallelism \cite{esbuild_fast}.
   \item  Snowpack \cite{snowpack_web} - Snowpack is an alternative to heavier, more complex bundlers
-        like Webpack or Parcel in your development workflow. Snowpack leverages JavaScript's native
-        module system called \emph{(ESM - ES modules)} which makes it scale much better as the
-        project grows on size.
+        like Webpack or Parcel. Snowpack leverages JavaScript's native module system called
+        \emph{(ESM - ES modules)} which makes it scale much better as the project grows on size.
   \item  Vite \cite{vite_web} - Vite is very similar to Snowpack and uses the same idea - \emph{use
           the native ES modules}. The main difference is that Vite is opinionated about
         \emph{production builds} and uses \emph{Rollup} under the hood. This provides simpler
@@ -37,7 +37,7 @@ starters \emph{(which use Webpack as bundler internally)}:
 
 \begin{itemize}
   \item  NextJS \cite{nextjs_web} - NextJS is a React framework, which provides many features such
-        as extended server side rendering, hosting, deployments, etc...
+        as server side rendering, hosting, deployments, etc...
   \item  CRA (Create React App) \cite{cra_web} - CRA is the official recommended way by React to
         bootstrap new application which want to use React. It uses very well configured Webpack
         under the hood and keeps in sync with latest React versions.
@@ -67,8 +67,8 @@ ESBuild was the first project examined, however there wasn't much to test regard
 ESBuild only transpiles and concatenates the JS code which is then included in HTML file and server
 by sample server. It doesn't provide neither code reloading nor any special error reporting.
 
-This demonstrates that bundling itself is often not a problem, because any advanced operations such
-as \emph{minification or obfuscation} should preserve the code correctness - for example, if a TT
+This demonstrates that bundling itself is often not a problem, because any advanced operations, such
+as, \emph{minification or obfuscation} should preserve the code correctness - for example, if a TT
 policy is enclosed in a module \emph{(and not exported)} than it must be enclosed in the bundled
 code as well.
 
@@ -78,8 +78,8 @@ code seems to minify well \cite{tt_webpack_integration_minification}.
 \section{Snowpack}
 
 Snowpack was the second bundler examined. As mentioned it uses ES modules and avoids module
-concatenation for development. As mentioned though, module concatenation isn't the root cause when
-doing TT integration.
+concatenation for development. As mentioned though, module concatenation on it's own isn't the root
+cause for TT violations.
 
 The pleasant finding was that hot reloading was working out of the box with TT integration. This is
 because when a source module \emph{(JS file)} changes, it is downloaded by the browser and picked up
@@ -94,8 +94,8 @@ There was only a single TT violation caused by Snowpack error overlay widget, wh
 
 \section{Vite}
 
-Vite is very similar to Snowpack and uses ES modules same as Snowpack. It also doesn't provide an
-error overlay so there is no violation for this case.
+Vite is very similar to Snowpack and uses ES modules same way as Snowpack. It also doesn't provide
+an error overlay so there is no violation for this case.
 
 However, I found out that reloading CSS triggers TT violation, because it seems to use dynamic style
 elements under the hood \cite{vite_violation}.
@@ -128,8 +128,8 @@ of sinks apart from unsafe usages in developer code \cite{tt_source_file_violati
 
 \section{CRA}
 
-Another very popular choice to bootstrap the project using CRA - Create react app. This is also the
-official recommended way to start a React single page application.
+Another very popular choice to bootstrap the project is using CRA - Create react app. This is also
+the official recommended way to start a React single page application.
 
 I've also wanted to test how TT play together with browser extensions. I've created a basic crypto
 app which integrates with Metamask browser extension, which is used to connect to Ethereum

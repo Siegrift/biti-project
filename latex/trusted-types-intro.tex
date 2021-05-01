@@ -2,27 +2,30 @@
 
 \label{chapter:intro-tt} % chapter id for ref command
 
-In this chapter we are going to introduce the concept of Trusted Types (abbreviated as TT). The
-threat model under which TT operate is DOM XSS \emph{(subset of client side XSS)}. This
-vulnerability happens when untrusted, user controlled input reaches a \emph{sink} which is function
-like \emph{eval()} or \emph{innerHTML} property of an HTML element.
+In this chapter we are going to introduce the concept of Trusted Types (abbr. TT). The threat model
+under which TT operate is DOM XSS \emph{(subset of client side XSS)}. This vulnerability happens
+when untrusted, user controlled input reaches a \emph{sink} which is function like \emph{eval()} or
+\emph{innerHTML} property of an HTML element.
 
 The idea is to take all of the sinks and make them secure by default. For example, in DOM you can
 assign any string value to \emph{innerHTML} property of an element and the browser will parse the
-string using HTML parser and render the parsed markup. Instead, we make this property accept only
-\emph{\textbf{special branded objects}} and throw an error on any other value \emph{e.g. string}.
+string using HTML parser and render the parsed markup. The problem is that HTML \emph{script} tags
+can parse and execute arbitrary JS code. But that's not all, you can execute code with HTML
+attributes and CSS too. Instead, we make these sinks accept only \emph{\textbf{special branded
+    objects}} and throw an error on any other value.
 
 This is a breaking change behaviour in DOM spec and is unfortunately not acceptable to change the
-DOM spec in this way. Instead, users who want to use TT have to explicitely opt-in to enforce this
-API. As of now, TT are supported in chromium based browser, but it is likely the support will
-increase \cite{tt_compatibility}.
+spec in this way. Instead, users who want to use TT have to explicitely opt-in to enforce this API.
+As of now, TT are supported in Chromium based browser, but it is likely that the support will
+increase. You can check out the supported browsers in \cite{tt_compatibility}.
 
 Developers are asked to avoid the sinks if possible to reduce the attack surface, however, sometimes
 there is no way to avoid the sink. For such cases there should be a way for developers to create
 these \emph{special branded objects} and make them explicitely \textbf{trusted} by the DOM APIs and
-sinks - hence the name \emph{Trusted Types}. Of course, if creating TT would be as easy as calling
-wrapping the value in a function call, developers would quickly misuse this behaviour and just wrap
-the unsafe values in that function call instead of making sure the value can be trusted.
+sinks - hence the name \emph{Trusted Types}. Of course, if creating TT would be as easy as wrapping
+the value in a function call, developers would quickly misuse this behaviour and just wrap the
+unsafe values in that function call instead of making sure the value can be really trusted. To
+prevent this, there is a security mechanism guarding how these values can be created.
 
 Refer to the recommended explainer article for more info \cite{trusted_types_into} or the formal
 spec \cite{tt_spec}.
@@ -30,21 +33,21 @@ spec \cite{tt_spec}.
 \section{Enforcing Trusted Types}
 
 As mentioned, TT is backward incompatible change and must be enforced explicitely by the developers.
-You can enable TT by adding the following response header to the documents which should operate
-under TT enforced.
+You can enable it by adding the following response header to the documents which should operate
+under TT enforcement.
 
 \bigskip
 % https://tex.stackexchange.com/questions/75324/lstinputlisting-for-a-normal-text-file
-\begin{lstlisting}[language={}, caption={Restricting policy names}]
+\begin{lstlisting}[language={}, caption={Enforcing Trusted Types}]
   Content-Security-Policy: require-trusted-types-for 'script';
 \end{lstlisting}
 
 \section{Creating Trusted Types}
 
 Most of the times, you can avoid using the sinks alltogether and use safe DOM APIs instead
-\emph{e.g. create DOM node dynamically instead of innerHTML assignment}. However there are cases
-when using sinks can't be avoided, or the values are already sanitized/encoded. You can create
-trusted type which will be accepted by the DOM sink.
+\emph{(e.g. create DOM node dynamically instead of innerHTML assignment)}. However there are cases
+when using sinks can't be avoided, or the values are already trusted, sanitized or encoded. You can
+create trusted type from such value which will be accepted by the DOM sink.
 
 If your browser supports TT, you will have access to \emph{trustedTypes} global object on
 \emph{window} instance. You can use \emph{trustedTypes.createPolicy} function to create a policy,
@@ -71,7 +74,7 @@ and then you would use the policy simply by \emph{(again citing \cite{trusted_ty
 
 However, as you noticed the policies are named. This is because you can restrict which policies
 might be created by your application. All you need to do is provide additional response header with
-a whitelist of allowed policy names.
+a whitelist of allowed policy names, separated by comma.
 
 \bigskip
 % https://tex.stackexchange.com/questions/75324/lstinputlisting-for-a-normal-text-file
@@ -100,8 +103,8 @@ Creating your own policies and making sure \emph{trusted} values reach the sinks
 possible. Application code is largely composed of many dependencies and third party code, which the
 developer can't easily modify. For such cases, there is special \emph{\textbf{default policy}} which
 will be called when untrusted value reaches is sink. It is the last place where the developer
-\emph{(specifically, the handler function the developer implemented)} might want \emph{bless} the
-value such that it will be accepted by the DOM API. \cite{trusted_types_into}
+\emph{(specifically, the handler function the developer implemented)} can \emph{"bless"} the value
+such that it will be accepted by the DOM API. \cite{trusted_types_into}
 
 \bigskip
 \begin{lstlisting}[language=ES6, caption={Creating default policy}]
@@ -114,21 +117,21 @@ value such that it will be accepted by the DOM API. \cite{trusted_types_into}
 
 Note, that \emph{default policy} is still a named policy and must be listed in the allowlist
 specified by \emph{trusted-types} response header \emph{(of course, this only applies if the
-  application uses this header)}.
+  application restricts the policy names)}.
 
 \section{Trusted Types integration}
 
-TT is being developed and used internally at Google, where they integrate it into their core
+TT are being developed and used internally at Google, where they integrate it into their core
 products. However, many open source projects see the benefit of TT and started doing necessary steps
-needed for TT integration. The amount of work needed to integrate TT to application varies a lot.
+needed for the integration. The amount of work needed to integrate TT to application varies a lot.
 There are many factors which might contribute to this complexity:
 
 \begin{itemize}
-  \item  Bundlers - This is more a developer nuisance than production issue. Main purpose for
+  \item  Choice of a bundler - This is more a developer nuisance than production issue. Main purpose for
         bundlers is to transpile the code using latest \emph{(and not widely supported)} features to
         standard version of JavaScript that all browsers understand. Nowdays, bundlers also take
         care of serving the app in the development phase and providing features such as code
-        reloading \emph{which refresh the web page once developer code is saved} or showing a popup
+        reloading \emph{(which refreshes the web page once developer code is saved)} or showing a popup
         with error message and stack trace. These development features often cause violations when
         TT are enforced.
   \item DOM framework - Modern web apps usually use some kind of framework \emph{(examples include:

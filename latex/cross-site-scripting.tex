@@ -6,8 +6,8 @@ Cross site scripting (abbr. XSS) is one of the most prevalent security vulnerabi
 common one when talking about web applications. When we take into the account only the last year
 (year 2020), XSS has been ranked on 7th place in the OWASP top 10 vulnerabilities ranking.
 \cite{owasp_top_ten_vulns}. When, we look at the bounty programs only, and the money rewarded for
-each security vulnerability, we can see that XSS is the winner. Total bounty just for XSS was more
-than $4,2$ million USD \cite{top_ten_rewarded_vulns}.
+each security vulnerability, we can see that XSS is the winner. Total bounty just for XSS in year
+2020 was more than $4,2$ million USD \cite{top_ten_rewarded_vulns}.
 
 Citing very well written introduction from \cite{xss_owasp_intro}.
 
@@ -17,16 +17,15 @@ Citing very well written introduction from \cite{xss_owasp_intro}.
   code, generally in the form of a browser side script (for example encoded in URL), to a different
   end user. Flaws that allow these attacks to succeed are quite widespread and occur anywhere a web
   application uses input from a user within the output it generates without validating or encoding
-  it \cite{xss_owasp_intro}.
+  it.
 
   An attacker can use XSS to send a malicious script to an unsuspecting user. The end user’s browser
   has no way to know that the script should not be trusted, and will execute the script. Because it
   thinks the script came from a trusted source, the malicious script can access any cookies, session
   tokens, or other sensitive information retained by the browser and used with that site. These
-  scripts can even rewrite the content of the HTML page \cite{xss_owasp_intro}.
+  scripts can even rewrite the content of the HTML page.
 
-  \emph{(Be sure to read the cited article for more information and links \cite{xss_owasp_intro}.
-    The above paragraphs were also largely copied from that very well written article.)}
+  \emph{(Be sure to read the cited article for more information and links \cite{xss_owasp_intro})}
 \end{quotation}
 
 \section{Types of XSS}
@@ -34,30 +33,31 @@ Citing very well written introduction from \cite{xss_owasp_intro}.
 
 There are many types of XSS, although there is no single finite list of XSS types to rule them all
 \cite{lotr_fellowship}. Most experts distinguish at least between non-persistent \emph{(reflected)}
-and persistent \emph{(stored)}. There is also a third category \emph{DOM based XSS} which will be
-explained in more depth as this is the threat model under which Trusted Types operate.
+and persistent \emph{(stored)} XSS. There is also a third category, \emph{DOM based XSS}, which will
+be explained in more depth as this is the threat model under which Trusted Types operate.
 
 \begin{itemize}
   \item  Stored - The injected script is permanently saved in server database. The client
         \emph{(user's browser)} will then ask the server for the requested page and the response
         from the server will contain the malicious script.
-  \item  Reflected - Typically delivered via email or a neutral web site. occur when a malicious
+  \item  Reflected - Typically delivered via email or a neutral web site. It occurs when a malicious
         script is reflected off of a web application to the victim’s browser \cite{reflected_xss}.
   \item  DOM based - The vulnerability appears in the DOM - by executing some malicious code. In
-        reflective and stored Cross-site scripting attacks you can see the vulnerability payload in
-        the response page but in DOM based cross-site scripting, the HTML source code and response
-        of the attack will be exactly the same. You can only observe the change at runtime.
+        reflected and stored XSS attacks you can see the vulnerability payload in the response page
+        but in DOM based XSS, the HTML source code and response of the attack will be exactly the
+        same. You can only observe the change at runtime.
 \end{itemize}
 
 \section{Modern classification of XSS}
 
 The classification in the \emph{\hyperref[chapter:xss:types]{Section 1.1 - Types of XSS}} was
-created many years back and a lot has since changed. The web got more secure and modern frameworks
-try to enforce best security practices for developers using them. However, web has since evolved
-rapidly \emph{and still evolves} while still mostly preserving the backward compatibility with
-original JS spec - meaning you could still browse the web page created ~20 years ago with subtle
-differences \emph{(Compare that with running Android app created for version 4.1 Jelly Bean created
-  in mid 2012 on Android 11 released 2020 - good luck with that)}.
+created many years back and a lot has since changed. The web got more secure and changed. Heavy
+server oriented code shifted to client side single page apps and now a combination of client and
+server emerges. Modern frameworks try to bake in and enforce best security practices for developers.
+Despite the rapid web evolvement, web platform is still mostly preserving the backward compatibility
+with original JS spec - meaning you could still browse the web page created ~20 years ago with
+subtle differences \emph{(Compare that with running Android app created for version "4.1 Jelly Bean"
+  created in mid 2012 on "Android 11" released 2020 - good luck with that)}.
 
 The previous classification is not ideal, because the categories overlap. Citing from
 \cite{xss_owasp_types}:
@@ -85,15 +85,15 @@ Instead what they propose is just two categories (again, fully citing \cite{xss_
 \end{itemize}
 
 Just for completeness, DOM based XSS is a subset of client XSS. The source of the data is client
-side only. And again, study the full article \emph{(together with further references)} for more
-information \cite{xss_owasp_types}.
+side only. And again, study the full article \cite{xss_owasp_types} \emph{(together with further
+  references)} for more information.
 
 \section{Common examples of XSS}
 
-The basic example of XSS \emph{and probably the easiest to understand} is to take a page which
+The basic example of XSS \emph{(and probably the easiest to understand)} is to take a page which
 interpolates data from an URL. This is a common practice - you browse a site, find something of
 value and you want to share it with your friend. Nothing easier, you just copy the URL and they see
-the same content \emph{or at least similar} to you. This basic example is common for nearly all
+the same content \emph{(or at least similar)} to you. This basic example is common for nearly all
 shopping sites, tourism agencies, accommodation services etc...
 
 This type of attack can be easily demonstrated with the following example page:
@@ -143,8 +143,9 @@ send to benign users to exploit.
 For more examples, I recommend playing the \emph{"XSS games"} \cite{xss_game_1} \cite{xss_game_2}
 \cite{xss_game_3} \cite{xss_game_4}.
 
-Finally, there are many cheatsheets with possible attack payloads and polyglots \emph{Code that
-  works for various environments, such as HTML, JS, CSS}. For example: \cite{xss_attack_cheatsheet}.
+Finally, there are many cheatsheets with possible attack payloads and polyglots \emph{(code that
+  works for various environments, such as HTML, JS, CSS)}. For example:
+\cite{xss_attack_cheatsheet}.
 
 \section{Consequences of XSS}
 
@@ -175,7 +176,7 @@ Apart from these basic consequences, there are dozens of others. Citing \cite{xs
 \end{quotation}
 
 Also, sites might have more security vulnerabilities and even a benign XSS vulnerability might be
-used with combination with a different attack vector \emph{e.g. CSRF} which has often more severe
+used with combination with a different attack vector \emph{(e.g. CSRF)} which has often more severe
 consequences.
 
 \section{Protection}
@@ -183,11 +184,11 @@ consequences.
 There are no definitive measures to protect against XSS, however there are guidelines. XSS is caused
 by interpolating untrusted data into otherwise trusted environments. It is important to educate
 developers about the possible attack vectors and vulnerabilities in the underlying platforms
-\emph{e.g. DOM and possible attack vectors with HTML/CSS.}
+\emph{(e.g. DOM and possible attack vectors with HTML/CSS).}
 
 Applications, which need to interpolate uncontrolled user data into their applications need to make
 sure the input is safe. In pratice, this means \textbf{encoding} or \textbf{sanitizing} the inputs.
 It is also important to follow the new modern APIs which aim to prevent XSS - these include various
-security headers \emph{Use Security Headers in \cite{cypress_xss_consequences}} or modern APIs such
-as Safe-Types \cite{safe_types} and Trusted Types \cite{trusted_types_into}. The latter will be
-described in the rest of the paper.
+security headers \emph{(see \cite{cypress_xss_consequences})} or modern APIs such as Safe-Types
+\cite{safe_types} and Trusted Types \cite{trusted_types_into}. The latter will be described in the
+rest of the paper.
