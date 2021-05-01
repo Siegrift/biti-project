@@ -13,46 +13,53 @@ if (!window.trustedTypes) {
   throw new Error("Please use compatible browser which supports TT");
 }
 
+// inspired by
 // https://github.com/w3c/webappsec-trusted-types/wiki/Trusted-Types-for-function-constructor
-class TrustedFunction {
-  static policy = window.trustedTypes.createPolicy('TrustedFunctionWorkaround', {
-    createScript: (_, ...args) => {
-       args.forEach( (arg) => {
-         if (!window.trustedTypes.isScript(arg)) {
-           throw new Error("TrustedScripts only, please");
-         }
-       });
-       
-       // NOTE: This is insecure without parsing the arguments and body, 
-       // Malicious inputs  can escape the function body and execute immediately!
-       
-       const fnArgs = args.slice(0, -1).join(',');
-       const fnBody = args.pop().toString();
-       const body = `(function anonymous(
-       ${fnArgs}
-       ) {
-       ${fnBody}
-       })`;
-       return body;
-    }
-  });
-
-  constructor(...args) {
-    return window.eval(TrustedFunction.policy.createScript('', ...args));
-  } 
+const trustedFunctionWorkaround = window.trustedTypes.createPolicy('TrustedFunctionWorkaround', {
+  createScript: (...args) => {
+    args.forEach((arg) => {
+      if (!window.trustedTypes.isScript(arg)) {
+        // this error will never be user visible. TODO: raise issue
+        throw new Error("TrustedScripts only, please");
+       }
+     });
+     
+     // NOTE: This is insecure without parsing the arguments and body, 
+     // Malicious inputs can escape the function body and execute immediately!
+     
+     const fnArgs = args.slice(0, -1).join(',');
+     const fnBody = args.pop().toString();
+     const body = `(function anonymous(
+     ${fnArgs}
+     ) {
+     ${fnBody}
+     })`;
+     return body;
+  }
+});
+const TrustedFunction = (...args) => {
+  console.warn('[DEV]: Blessing Function constructor value', ...args)
+  return window.eval(trustedFunctionWorkaround.createScript(...args));
 }
+TrustedFunction.prototype = {}
+TrustedFunction.prototype.apply = Function.apply
+TrustedFunction.apply = Function.apply
 
-// This seem to work with third party code as well
+// This seem to work with third party code as well It is needed for metamask extension - but I am
+// not sure for what reason. It seems to work even without it. TODO: determine why
 window.Function = TrustedFunction
 
 // Setup default policy which allows assigning the HMR widget.
 window.trustedTypes.createPolicy('default', {
   createHTML: (value) => {
-    // TODO: There seems to be a bug that default policy is not called on
-    // hot reload even though default policy was the first thing that
-    // executed (it's the topmost script in head).
+    // Unfortunately, default policy is not called on hot reload even though the script containing
+    // default policy code was the first script loaded on page. This is actually, intended
+    // behaviour. See:
+    // https://w3c.github.io/webappsec-trusted-types/dist/spec/#cross-document-vectors
+    console.warn('[DEV]: Blessing HTML value', {value})
     return value
   },
+  // needed for webpack code reloading
   createScriptURL: (value) => {
     console.warn('[DEV]: Blessing script value', {value})
     return value

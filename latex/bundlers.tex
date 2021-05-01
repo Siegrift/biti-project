@@ -53,26 +53,98 @@ are not going to compare the bundlers among themselves, but rather focus on TT i
 you can check the blog post at
 \url{https://css-tricks.com/comparing-the-new-generation-of-build-tools/}.
 
+Unfortunately, the example application didn't cause any XSS on it's own because React avoids using
+sinks and instead creates DOM elements dynamically. Instead, I've created a sample React component
+with example attack vectors - one with and the other without trusted types policy.
+
+All of the examples can be run locally, because you can mock CSP policy using HTML meta header which
+is included in every entry point HTML file. You can find all of the projects \emph{(as well as the
+  sources for this document)} in \url{https://github.com/Siegrift/biti-project}.
+
 \section{ESBuild}
 
-TODO:
+ESBuild was the first project examined, however there wasn't much to test regarding TT integration.
+ESBuild only transpiles and concatenates the JS code which is then included in HTML file and server
+by sample server. It doesn't provide neither code reloading nor any special error reporting.
+
+This demonstrates that bundling itself is often not a problem, because any advanced operations such
+as \emph{minification or obfuscation} should preserve the code correctness - for example, if a TT
+policy is enclosed in a module \emph{(and not exported)} than it must be enclosed in the bundled
+code as well.
+
+However minification impact is a valid concern for bundlers, this seems to not be an issue as the TT
+code seems to minify well \cite{tt_webpack_integration_minification}.
 
 \section{Snowpack}
 
-TODO:
+Snowpack was the second bundler examined. As mentioned it uses ES modules and avoids module
+concatenation for development. As mentioned though, module concatenation isn't the root cause when
+doing TT integration.
+
+The pleasant finding was that hot reloading was working out of the box with TT integration. This is
+because when a source module \emph{(JS file)} changes, it is downloaded by the browser and picked up
+by the running web page.
+
+\emph{(For example, when webpack is trying to reload the code it first has to create a bundle or
+  chunk, and then it uses dynamically created script to download it from dev server. However
+  \textbf{script.src} is a sink and TT disallows such assignment.)}
+
+There was only a single TT violation caused by Snowpack error overlay widget, which is using
+\emph{Element.innerHTML} internally \cite{snowpack_violation}.
 
 \section{Vite}
 
-TODO:
+Vite is very similar to Snowpack and uses ES modules same as Snowpack. It also doesn't provide an
+error overlay so there is no violation for this case.
+
+However, I found out that reloading CSS triggers TT violation, because it seems to use dynamic style
+elements under the hood \cite{vite_violation}.
 
 \section{WMR}
 
-TODO:
+WMR has basically same results as ESBuild because it only bundles the code.
 
 \section{NextJS}
 
-TODO:
+Since all of the example projects targeted React and a specific \emph{modern} bundler, I've decided
+to revisit the integrations with current state of the art project boilerplates/frameworks.
+
+NextJS is a very popular choice these days, because it comes preconfigured with webpack, React,
+routing, serverless and more. It is also integrated with a great CLI which allows developers to
+deploy the application in just a single command \emph{(and for free as of now)} \cite{nextjs_web}.
+
+Unfortunately, nextJS is complex and there are many places which cause TT violations:
+
+\begin{itemize}
+  \item  HTML violations - For hot reload container which is inject to page using \emph{innerHTML}
+        property.
+  \item  Script violations - For webpack hot reload. It downloads chunks, which then execute the
+        updated code using \emph{eval}.
+  \item  Script URL violations - Also for webpack hot reload.
+\end{itemize}
+
+Unfortunately, as of now, there is no ideal best practice how to differentiate these benign usages
+of sinks apart from unsafe usages in developer code \cite{tt_source_file_violation_issue}.
 
 \section{CRA}
 
-TODO:
+Another very popular choice to bootstrap the project using CRA - Create react app. This is also the
+official recommended way to start a React single page application.
+
+I've also wanted to test how TT play together with browser extensions. I've created a basic crypto
+app which integrates with Metamask browser extension, which is used to connect to Ethereum
+blockchain. There were three types of TT violations:
+
+\begin{itemize}
+  \item  HTML violations - Caused by react error overlay component. Unfortunately, you can't
+        suppress this error even with default policy, because the sink assignment happens in another
+        JS realm. You can understand more in \cite{cross_document_vectors}.
+  \item  Script violations - Metamask browser extension is using a Function constructor. I am not
+        sure what for, because the app seems to work even when this code is disallowed. Also, due to
+        a bug in chromium a workaround is needed to suppress this violation
+        \cite{tt_fn_constructor}.
+  \item  Script URL violations - Again, needed for webpack hot reload.
+\end{itemize}
+
+The only significant problem was the HTML violation in overlay component. This error can only
+\emph{(and should)} be fixed by the library.

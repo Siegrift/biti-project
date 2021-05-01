@@ -104,7 +104,7 @@ export default class Home extends React.Component {
         {/* Will try to add iframe with srcdoc. */}
         <p>
           <button onClick={() => this.setState({ iframe: true })}>
-            Add unsecure iframe
+            Add insecure iframe
           </button>
           {this.state.iframe && (
             <iframe srcDoc={'<script>alert(0)</script>'}></iframe>
