@@ -8,7 +8,7 @@ purpose of the project was to take a look at example application using many mode
 how they integrate with Trusted Types. This work was based off my previous experience when doing the
 integration for Webpack \cite{webpack_tt_integration}.
 
-When bundlers are not TT compatible it often means \textbf{hard blocker} for the application
+When bundlers are not TT compatible it is often a \textbf{hard blocker} for the application
 developer to start using TT. This is because the application in dev environment might not even load
 \emph{(this is the case when using webpack)} or some features such as hot reloading and error
 widgets might not work properly.
@@ -64,7 +64,7 @@ is included in every entry point HTML file. You can find all of the projects \em
 \section{ESBuild}
 
 ESBuild was the first project examined, however there wasn't much to test regarding TT integration.
-ESBuild only transpiles and concatenates the JS code which is then included in HTML file and server
+ESBuild only transpiles and concatenates the JS code which is then included in HTML file and served
 by sample server. It doesn't provide neither code reloading nor any special error reporting.
 
 This demonstrates that bundling itself is often not a problem, because any advanced operations, such
@@ -97,7 +97,7 @@ There was only a single TT violation caused by Snowpack error overlay widget, wh
 Vite is very similar to Snowpack and uses ES modules same way as Snowpack. It also doesn't provide
 an error overlay so there is no violation for this case.
 
-However, I found out that reloading CSS triggers TT violation, because it seems to use dynamic style
+However, I found out that reloading CSS triggers TT violation, because it uses dynamic style
 elements under the hood \cite{vite_violation}.
 
 \section{WMR}
@@ -116,7 +116,7 @@ deploy the application in just a single command \emph{(and for free as of now)} 
 Unfortunately, nextJS is complex and there are many places which cause TT violations:
 
 \begin{itemize}
-  \item  HTML violations - For hot reload container which is inject to page using \emph{innerHTML}
+  \item  HTML violations - For hot reload container which is injected to page using \emph{innerHTML}
         property.
   \item  Script violations - For webpack hot reload. It downloads chunks, which then execute the
         updated code using \emph{eval}.
@@ -138,7 +138,7 @@ blockchain. There were three types of TT violations:
 \begin{itemize}
   \item  HTML violations - Caused by react error overlay component. Unfortunately, you can't
         suppress this error even with default policy, because the sink assignment happens in another
-        JS realm. You can understand more in \cite{cross_document_vectors}.
+        JS realm. See \cite{cross_document_vectors} for details.
   \item  Script violations - Metamask browser extension is using a Function constructor. I am not
         sure what for, because the app seems to work even when this code is disallowed. Also, due to
         a bug in chromium a workaround is needed to suppress this violation

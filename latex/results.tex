@@ -16,7 +16,7 @@ repeated among the bundlers.
         Metamask widget \emph{(not sure why though)}. Developers need to use default policy with
         \emph{createScript} function.
   \item  Script URL violations - Again, needed for webpack hot reload. The chunks to be reloaded are
-        downloaded using and dynamically created script and by assigning to \emph{script.src}
+        downloaded using dynamically created script and by assigning to \emph{script.src}
         property. Developers need to use default policy with \emph{createScriptURL} function.
 \end{itemize}
 
@@ -28,7 +28,7 @@ Snowpack doesn't need any policy for code reload and Vite only needs a policy to
 I feel the biggest problem with TT is the adoption difficulty. Developers are facing difficult
 issues in third party code \emph{(which is often minified)} and default policy doesn't provide
 enough context to reliably allow only \emph{Trusted values}
-\cite{tt_source_file_violation_issue_comment}.
+\cite{tt_violation_issue_comment}.
 
 Another aspect of work is to implement TT integrations inside the bundlers and project starters. The
 future of TT seems bright as React, Angular, VS Code and many other project start to use and enforce

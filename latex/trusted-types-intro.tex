@@ -16,7 +16,7 @@ attributes and CSS too. Instead, we make these sinks accept only \emph{\textbf{s
 
 This is a breaking change behaviour in DOM spec and is unfortunately not acceptable to change the
 spec in this way. Instead, users who want to use TT have to explicitely opt-in to enforce this API.
-As of now, TT are supported in Chromium based browser, but it is likely that the support will
+As of now, TT are supported in Chromium based browser but it is likely that the support will
 increase. You can check out the supported browsers in \cite{tt_compatibility}.
 
 Developers are asked to avoid the sinks if possible to reduce the attack surface, however, sometimes
@@ -27,7 +27,7 @@ the value in a function call, developers would quickly misuse this behaviour and
 unsafe values in that function call instead of making sure the value can be really trusted. To
 prevent this, there is a security mechanism guarding how these values can be created.
 
-Refer to the recommended explainer article for more info \cite{trusted_types_into} or the formal
+Refer to the recommended explainer article \cite{trusted_types_into} for more info or the formal
 spec \cite{tt_spec}.
 
 \section{Enforcing Trusted Types}
@@ -87,7 +87,8 @@ a whitelist of allowed policy names, separated by comma.
 Before switching to enforcing mode, which will cause an error when untrusted value is assigned to a
 sink, you can switch to report only mode, which will preserve the original DOM API behaviour
 \emph{(no error will be thrown and standard sink behaviour will be used)}. However, there will be a
-warning in the console and CSP violation will be triggered. \cite{tt_intro_csp_violation}.
+warning in the console and CSP violation will be triggered, which can be sent to configured URL for
+triage \cite{tt_intro_csp_violation}.
 
 You will also have to use slightly different CSP response header \cite{trusted_types_into}:
 
@@ -102,7 +103,7 @@ You will also have to use slightly different CSP response header \cite{trusted_t
 Creating your own policies and making sure \emph{trusted} values reach the sinks is not always
 possible. Application code is largely composed of many dependencies and third party code, which the
 developer can't easily modify. For such cases, there is special \emph{\textbf{default policy}} which
-will be called when untrusted value reaches is sink. It is the last place where the developer
+will be called when untrusted value reaches the sink. It is the last place where the developer
 \emph{(specifically, the handler function the developer implemented)} can \emph{"bless"} the value
 such that it will be accepted by the DOM API. \cite{trusted_types_into}
 
